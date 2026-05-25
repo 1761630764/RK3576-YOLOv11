@@ -10,7 +10,7 @@
 ### 2. [yolov11track](yolov11track/)
 RK3576开发板板载部署代码，实现目标检测、ByteTrack追踪、计数统计及下位机通讯功能。
 - **部署系统**: Debian
-- **功能**: 检测、追踪、计数、串口通讯
+- **功能**: 检测、追踪、计数、TCP Modbus通讯
 
 ### 3. [yolov11convertrknn](yolov11convertrknn/)
 YOLOv11模型格式转换代码，将训练好的模型转换为RK3576可部署的RKNN格式。
