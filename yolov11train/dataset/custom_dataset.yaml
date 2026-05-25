@@ -1,0 +1,52 @@
+# 自定义数据集配置文件
+# YOLOv11n 自定义数据集训练配置
+
+# 数据集根目录路径（相对或绝对路径）
+path: E:/Code/rkyolov11/yolov11train/dataset  # 数据集根目录
+
+# 训练集、验证集、测试集路径（相对于path）
+train: images/train  # 训练图片目录
+val: images/valid    # 验证图片目录
+test: images/test    # 测试图片目录（可选）
+
+# 类别数量
+nc: 1  # number of classes
+
+# 类别名称（根据你的实际需求修改）
+names:
+  0: apple
+
+
+# 数据集说明
+# 目录结构应该如下：
+# datasets/custom_dataset/
+# ├── images/
+# │   ├── train/
+# │   │   ├── img1.jpg
+# │   │   ├── img2.jpg
+# │   │   └── ...
+# │   ├── val/
+# │   │   ├── img1.jpg
+# │   │   ├── img2.jpg
+# │   │   └── ...
+# │   └── test/  (可选)
+# │       ├── img1.jpg
+# │       └── ...
+# └── labels/
+#     ├── train/
+#     │   ├── img1.txt
+#     │   ├── img2.txt
+#     │   └── ...
+#     ├── val/
+#     │   ├── img1.txt
+#     │   ├── img2.txt
+#     │   └── ...
+#     └── test/  (可选)
+#         ├── img1.txt
+#         └── ...
+#
+# 标注格式（YOLO格式）：
+# 每个图片对应一个txt文件，每行格式为：
+# class_id center_x center_y width height
+# 其中坐标都是归一化的（0-1之间）
+# 例如：0 0.5 0.5 0.3 0.4

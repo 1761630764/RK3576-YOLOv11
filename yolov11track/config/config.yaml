@@ -1,0 +1,124 @@
+# YOLOv8n + ByteTrack 配置文件
+
+# ===== 相机配置 =====
+camera:
+  device_id: 0                   # 摄像头ID (0,1,2...) 或视频文件路径 "test.mp4" 
+                                 # 或 RTSP地址 "rtsp://..."
+  width: 640                     # 图像宽度（匹配相机实际分辨率）
+  height: 480                    # 图像高度（匹配相机实际分辨率）
+  fps: 30                        # 目标帧率（匹配相机实际帧率）
+  buffer_size: 10                # 帧缓冲队列大小
+  
+  # 曝光控制
+  auto_exposure: true             # 自动曝光（true/false）
+  exposure_value: -1              # 手动曝光值（-1为自动，范围通常0-10000）
+  
+  # 增益控制
+  auto_gain: true                 # 自动增益（true/false）
+  gain_value: -1                  # 手动增益值（-1为自动，范围通常0-100）
+  
+  # 白平衡
+  auto_white_balance: true        # 自动白平衡（true/false）
+  white_balance_temp: -1          # 色温值（-1为自动，范围通常2000-10000K）
+  
+  # 图像增强
+  brightness: 0                   # 亮度调整（-100到100，0为默认）
+  contrast: 0                     # 对比度调整（-100到100，0为默认）
+  saturation: 0                   # 饱和度调整（-100到100，0为默认）
+  sharpness: 0                    # 锐度调整（-100到100，0为默认）
+  
+  # 图像变换
+  rotation: 0                     # 旋转角度（0/90/180/270）
+  flip_horizontal: false          # 水平翻转
+  flip_vertical: false            # 垂直翻转
+  
+  # 连接设置
+  timeout: 10                     # 连接超时时间（秒）
+  reconnect: true                 # 断线自动重连
+  reconnect_interval: 5           # 重连间隔（秒）
+  max_reconnect_attempts: 10      # 最大重连次数（-1为无限）
+  
+  # 编码设置（用于RTSP流）
+  codec: "mjpeg"                   # 视频编码格式（h264/h265/mjpeg）
+  backend: "v4l2"                 # 后端选择（auto/v4l2/gstreamer/ffmpeg）
+
+# ===== 检测器配置 =====
+detector:
+  model_path: "conversion/models/yolov11n_int8.rknn"  # RKNN模型路径
+  input_size: 640                 # 输入尺寸（YOLO会自动缩放）
+  conf_threshold: 0.15            # 置信度阈值（降低以提高召回率）
+  nms_threshold: 0.15             # NMS阈值（降低可减少重复框）
+  target_class: 0                 # 目标类别ID（0=大蒜,39=bottle） 
+
+# ===== ByteTrack跟踪器配置 =====
+tracker:
+  track_thresh: 0.45               # 高置信度阈值（用于初始化新跟踪）
+  low_thresh: 0.1                 # 低置信度阈值（ByteTrack关键参数，用于关联）
+  match_thresh: 0.7               # IoU匹配阈值（越高越严格）
+  track_buffer: 30                # 跟踪缓冲帧数（目标消失后保留的帧数）
+  min_box_area: 20                # 最小框面积（过滤过小的检测框）
+
+  # 参数说明：
+  # - track_thresh: 高于此阈值的检测框用于初始化新跟踪，越高越精准，建议0.5-0.8
+  # - low_thresh: 低于track_thresh但高于此阈值的检测框匹配已有跟踪，track_thresh的1/2：0.2-0.4
+  # - match_thresh: IoU匹配阈值，越高要求检测框与跟踪框重叠越多，保持id不变：0.7-0.9
+  # - track_buffer: 目标消失后保留的帧数，适当增大可提高遮挡鲁棒性
+  # - min_box_area: 过滤掉面积过小的检测框,默认值 10~50
+
+# ===== 计数器配置 =====
+counter:
+  count_threshold: 5             # 触发阈值（达到后发送Modbus指令）
+  reset_on_trigger: true          # 触发后是否清零当前计数
+  trigger_mode: "total"           # 触发模式：total(总数)/in(仅IN方向)/
+                                  # out(仅OUT方向)/net(净流量)
+  counting_mode: "track"          # 计数模式：track(追踪+划线，每个目标只计数一次)/
+                                  # line(单独划线，每次穿越都计数)
+  # 计数线配置
+  counting_line:
+    position: 0.5                 # 线的位置（0-1，相对于图像高度/宽度）
+    direction: "horizontal"       # 线的方向：horizontal（水平）/vertical（垂直）
+    thickness: 2                  # 线的粗细（像素）
+    color: [0, 255, 0]           # 线的颜色（BGR格式，绿色）
+
+    # 方向说明：
+    # horizontal（水平线）：
+    #   - IN方向：从上往下穿越（y坐标增大）
+    #   - OUT方向：从下往上穿越（y坐标减小）
+    # vertical（垂直线）：
+    #   - IN方向：从左往右穿越（x坐标增大）
+    #   - OUT方向：从右往左穿越（x坐标减小）
+
+# ===== 可视化配置 =====
+visualization:
+  show_window: true              # 是否显示窗口（无显示环境设为false）
+  save_video: false                # 是否保存视频（用于调试和健康检查）
+  output_path: "output/videos/"   # 视频输出路径
+  max_video_duration: 300         # 最大录制时长（秒），0表示无限制
+  show_fps: true                  # 是否显示FPS
+  box_color: [0, 255, 0]         # 检测框颜色（BGR格式）
+  text_color: [255, 255, 255]    # 文字颜色（BGR格式）
+  font_scale: 0.6                 # 字体大小
+  thickness: 2                    # 线条粗细
+
+# ===== 性能监控配置 =====
+performance_monitor:
+  enabled: true                   # 是否启用性能监控
+  log_interval: 1                # 日志输出间隔（秒）
+  window_size: 30                 # 滑动窗口大小（帧数）
+  show_in_ui: true                # 是否在UI显示
+
+# ===== Modbus配置 =====
+modbus:
+  enabled: true                   # 是否启用Modbus - 客户端（Client）主动发数据
+  host: "192.168.137.235"          # Modbus服务器IP - PLC的IP
+  port: 502                       # Modbus端口
+  unit_id: 1                      # 从站ID
+  register_address: 1             # 寄存器地址
+  command_value: 1                # 触发时写入的值
+  keep_alive: true                # 保持连接（true=保持连接，false=每次发送后断开）
+  timeout: 5                      # 超时时间（秒）
+  retry_times: 3                  # 重试次数
+
+  # 心跳机制（保持长连接）
+  heartbeat_enabled: true         # 是否启用心跳（定期读取寄存器保持连接）
+  heartbeat_interval: 5          # 心跳间隔（秒），建议5-15秒
